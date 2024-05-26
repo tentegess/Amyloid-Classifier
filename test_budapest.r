@@ -1,14 +1,21 @@
-# install.packages("e1071")
-# install.packages("tidyverse")
-# install.packages("caret")
-# install.packages("here")
-# install.packages("pROC")
+if (!"readxl" %in% installed.packages()) install.packages("readxl")
+if (!"dplyr" %in% installed.packages()) install.packages("dplyr")
+if (!"caret" %in% installed.packages()) install.packages("caret")
+if (!"e1071" %in% installed.packages()) install.packages("e1071")
+if (!"here" %in% installed.packages()) install.packages("here")
+if (!"pROC" %in% installed.packages()) install.packages("pROC")
+
 library(readxl)
 library(dplyr)
 library(caret)
 library(e1071)
 library(here)
 library(pROC)
+
+# Plik z podejsciem z artkułu Budapest gdzie wykorzystujemy gotową tabele danych 
+# dotyczącą prawdopdobieństwa tendencji regionu amyloidogennego na podstawie pozycji
+# aminokwasu w łańcuchu (heksapeptyd czyli lancuch 6 aminokwasów 'sekwencja')
+# ROC + Crossvalidacja + autostrojenie modelu
 
 # Load the data
 data <- read_excel(here("waltzdb_export.xlsx"))
@@ -34,8 +41,8 @@ data[, categorical_columns] <- categorical_data
 data$Classification <- factor(data$Classification)
 levels(data$Classification) <- make.names(levels(data$Classification))
 
-
-
+# Predefined table of occurrence values at a given position in the 
+# amino acid sequence from the Budapest article
 pssm <- matrix(
   c(
     -0.26, -0.32, -0.27, -0.14, -0.43, -0.22,  # A
@@ -83,15 +90,14 @@ encoded_data <- do.call(rbind, lapply(data$Sequence, function(seq) encode_sequen
 encoded_data <- as.data.frame(encoded_data)
 data <- cbind(data, encoded_data)
 data <- data[, !(names(data) %in% 'Sequence')]
+
 # Split data into training and testing sets
 set.seed(123)
 training_samples <- createDataPartition(data$Classification, p = 0.8, list = FALSE)
 train_data <- data[training_samples, ]
 test_data <- data[-training_samples, ]
 
-
-# kroswalidacja
-
+# Crossvalidation
 train_control <- trainControl(
   method = "cv",
   number = 10,
@@ -135,8 +141,8 @@ svm_cv <- train(
   tuneLength = 10
 )
 
+#Results
 print(svm_cv)
-
 predictions <- predict(svm_cv, newdata=test_data, type = "prob")
 prob_scores <- predictions[, "amyloid"]
 class_labels <- factor(ifelse(prob_scores > 0.5, "amyloid", "non.amyloid"), levels = c("amyloid", "non.amyloid"))
