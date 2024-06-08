@@ -32,6 +32,10 @@ process_aaindex <- function(aaindex) {
     names(aaindex[[i]]$I) <- amino_acids_dict[names(aaindex[[i]]$I)]
   }
   
+  for (i in seq_along(aaindex)) {
+    aaindex[[i]]$I[is.na(aaindex[[i]]$I)] <- 0
+  }
+  
   return(aaindex)
 }
 

@@ -46,7 +46,7 @@ sum_index_values <- function(sequence, amino_acids, aa_index) {
   return(sum_values)
 }
 
-for (i in 1:200) {
+for (i in seq_along(aa_index1_dto)) {
   column_physic <- sapply(data_basic$Sequence, function(seq)
     sum_index_values(seq, names(aa_index1_dto[[i]]$I), aa_index1_dto[[i]]$I))
 
@@ -54,16 +54,6 @@ for (i in 1:200) {
   names(column_physic_df) <- as.character(aa_index1_dto[[i]]$H)
   data <- cbind(data, column_physic_df)
 }
-
-# for (i in seq_along(aa_index1_dto)) {
-#   column_physic <- sapply(data_basic$Sequence, function(seq) 
-#     sum_index_values(seq, names(aa_index1_dto[[i]]$I), aa_index1_dto[[i]]$I))
-#   
-#   column_physic_df <- as.data.frame(column_physic)
-#   names(column_physic_df) <- as.character(aa_index1_dto[[i]]$H)
-#   data <- cbind(data, column_physic_df)
-# }
-
 
 # Podział danych na zestawy treningowe i testowe
 set.seed(123)
@@ -99,7 +89,6 @@ results <- rfe(selected_data, train_data$Classification, sizes=c(1:ncol(selected
 
 # Wyświetlenie wyników RFE
 print(results)
-
 
 # Wybór optymalnej liczby zmiennych
 optimal_vars <- predictors(results)
