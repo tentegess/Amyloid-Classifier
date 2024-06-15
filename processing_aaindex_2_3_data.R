@@ -1,5 +1,3 @@
-source("aa_index_2_3_dto.R")
-
 aa_names <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H",
               "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
 
