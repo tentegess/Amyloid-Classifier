@@ -46,14 +46,37 @@ sum_index_values <- function(sequence, amino_acids, aa_index) {
   return(sum_values)
 }
 
-for (i in seq_along(aa_index1_dto)) {
+
+# Wytrenowane 5 indeksów
+wartosci_do_wyciagniecia <- c("BAEK050101", "GEIM800107", "QIAN880121", "MANP780101", "PONP930101")
+wyniki <- list()
+
+for (wartosc in wartosci_do_wyciagniecia) {
+  if (wartosc %in% names(aa_index1_dto)) {
+    wyniki[[wartosc]] <- aa_index1_dto[[wartosc]]
+  }
+}
+
+for (i in seq_along(wyniki)) {
   column_physic <- sapply(data_basic$Sequence, function(seq)
-    sum_index_values(seq, names(aa_index1_dto[[i]]$I), aa_index1_dto[[i]]$I))
+    sum_index_values(seq, names(wyniki[[i]]$I), wyniki[[i]]$I))
 
   column_physic_df <- as.data.frame(column_physic)
-  names(column_physic_df) <- as.character(aa_index1_dto[[i]]$H)
+  names(column_physic_df) <- as.character(wyniki[[i]]$H)
   data <- cbind(data, column_physic_df)
 }
+
+
+# # Wszystkie indeksy do trenowania
+# for (i in seq_along(aa_index1_dto)) {
+#   column_physic <- sapply(data_basic$Sequence, function(seq)
+#     sum_index_values(seq, names(aa_index1_dto[[i]]$I), aa_index1_dto[[i]]$I))
+#   
+#   column_physic_df <- as.data.frame(column_physic)
+#   names(column_physic_df) <- as.character(aa_index1_dto[[i]]$H)
+#   data <- cbind(data, column_physic_df)
+# }
+
 
 # Podział danych na zestawy treningowe i testowe
 set.seed(123)
@@ -77,22 +100,22 @@ conf_matrix <- confusionMatrix(as.factor(predictions), as.factor(test_data$Class
 # Kroswalidacja
 svm_model <- svm(Classification ~ ., data = train_data, type = 'C-classification', kernel = 'radial')
 print(conf_matrix)
-
-# Utworzenie kontroli treningowej dla RFE
-ctrl <- rfeControl(functions=rfFuncs, method="cv", number=10, allowParallel = TRUE)
-
-# Wybierz kolumny od 21 do końca
-selected_data <- train_data[, 22:ncol(train_data)]
-
-# Wykonanie RFE
-results <- rfe(selected_data, train_data$Classification, sizes=c(1:ncol(selected_data)), rfeControl=ctrl)
-
-# Wyświetlenie wyników RFE
-print(results)
-
-# Wybór optymalnej liczby zmiennych
-optimal_vars <- predictors(results)
-print(optimal_vars)
+# 
+# # Utworzenie kontroli treningowej dla RFE
+# ctrl <- rfeControl(functions=rfFuncs, method="cv", number=10, allowParallel = TRUE)
+# 
+# # Wybierz kolumny od 21 do końca
+# selected_data <- train_data[, 22:ncol(train_data)]
+# 
+# # Wykonanie RFE
+# results <- rfe(selected_data, train_data$Classification, sizes=c(1:ncol(selected_data)), rfeControl=ctrl)
+# 
+# # Wyświetlenie wyników RFE
+# print(results)
+# 
+# # Wybór optymalnej liczby zmiennych
+# optimal_vars <- predictors(results)
+# print(optimal_vars)
 
 # Zakończenie równoległego przetwarzania
 stopImplicitCluster()
