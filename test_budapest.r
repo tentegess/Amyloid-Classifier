@@ -4,6 +4,7 @@ if (!"caret" %in% installed.packages()) install.packages("caret")
 if (!"e1071" %in% installed.packages()) install.packages("e1071")
 if (!"here" %in% installed.packages()) install.packages("here")
 if (!"pROC" %in% installed.packages()) install.packages("pROC")
+if (!"mltools" %in% installed.packages()) install.packages("mltools")
 
 library(readxl)
 library(dplyr)
@@ -11,6 +12,7 @@ library(caret)
 library(e1071)
 library(here)
 library(pROC)
+library(mltools)
 
 # Plik z podejsciem z artkułu Budapest gdzie wykorzystujemy gotową tabele danych 
 # dotyczącą prawdopdobieństwa tendencji regionu amyloidogennego na podstawie pozycji
@@ -147,7 +149,9 @@ predictions <- predict(svm_cv, newdata=test_data, type = "prob")
 prob_scores <- predictions[, "amyloid"]
 class_labels <- factor(ifelse(prob_scores > 0.5, "amyloid", "non.amyloid"), levels = c("amyloid", "non.amyloid"))
 roc_curve <- roc(response = as.factor(test_data$Classification), predictor = prob_scores)
-conf_matrix <- confusionMatrix(class_labels, as.factor(test_data$Classification))
+conf_matrix <- confusionMatrix(class_labels, as.factor(test_data$Classification), mode = "everything")
 print(conf_matrix)
 print(paste("AUC:", auc(roc_curve)))
 plot(roc_curve)
+mcc_value <- mcc(preds = class_labels, actuals = as.factor(test_data$Classification))
+print(paste("MCC:", mcc_value))
