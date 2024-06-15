@@ -88,17 +88,13 @@ test_data <- data[-training_samples, ]
 train_control <- trainControl(method = "cv", number = 10, search = "grid", allowParallel = TRUE)
 tune_grid <- expand.grid(sigma = seq(0.01, 0.1, length = 10), C = 2^seq(-1, 1, length = 10))
 
-# Dodanie dodatkowych cech
-train_data_encoded <- cbind(train_data, encoded_data)
-test_data_encoded <- cbind(test_data, encoded_data)
-
-svm_cv <- train(Classification ~ ., data = train_data_encoded, method = "svmRadial", metric = "Accuracy", trControl = train_control, tuneGrid = tune_grid, preProcess = c("center", "scale"), tuneLength = 10)
+svm_cv <- train(Classification ~ ., data = train_data, method = "svmRadial", metric = "Accuracy", trControl = train_control, tuneGrid = tune_grid, preProcess = c("center", "scale"), tuneLength = 10)
 
 # Podsumowanie modelu SVM
 summary(svm_cv)
 
 # Predykcje i macierz pomyłek
-predictions <- predict(svm_cv, test_data_encoded)
+predictions <- predict(svm_cv, test_data)
 conf_matrix <- confusionMatrix(as.factor(predictions), as.factor(test_data$Classification))
 
 # Kroswalidacja
