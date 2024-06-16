@@ -4,6 +4,7 @@ if (!"e1071" %in% installed.packages()) install.packages("e1071")
 if (!"here" %in% installed.packages()) install.packages("here")
 if (!"doParallel" %in% installed.packages()) install.packages("doParallel")
 if (!"mltools" %in% installed.packages()) install.packages("mltools")
+if (!"stringr" %in% installed.packages()) install.packages("stringr")
 
 library(readxl)
 library(dplyr)
@@ -14,6 +15,7 @@ library(randomForest)
 library(doParallel)
 library(mltools)
 library(pROC)
+library(stringr)
 
 numCores <- detectCores()
 registerDoParallel(cores = numCores - 1)
@@ -85,6 +87,36 @@ for (i in seq_along(wyniki)) {
 
   column_physic_df <- as.data.frame(column_physic)
   names(column_physic_df) <- as.character(wyniki[[i]]$H)
+  data <- cbind(data, column_physic_df)
+}
+
+#index 2 i 3
+wartosci_do_wyciagniecia <- c("DOSZ010101", "MEHP950103", "MEHP950102", "QU_C930101", "DOSZ010103", "ZHAC000106", "THOP960101", "ZHAC000103", "LIWA970101", "ZHAC000101")
+wyniki <- list()
+
+for (index in seq_along(aa_index_2_3_dto)){
+  if (aa_index_2_3_dto[[index]]$H %in% wartosci_do_wyciagniecia){
+    wyniki[[aa_index_2_3_dto[[index]]$H]] <- aa_index_2_3_dto[[index]]$I
+  }
+}
+
+sum_index_values_index_2_3 <- function(sequence, aa_index) {
+  # Rozdzielenie sekwencji na pary aminokwasów
+  amino_acids_in_seq <- strsplit(sequence, "")[[1]]
+  sum_values <- 0
+  # Sumowanie wartości indeksu dla każdego aminokwasu w sekwencji
+  for (i in seq(1, length(amino_acids_in_seq) - 1)) {
+    sum_values <- sum_values + sum(aa_index[str_sub(amino_acids_in_seq[i]), amino_acids_in_seq[i+1]])
+  }
+  return(sum_values)
+}
+
+for (i in seq_along(wyniki)) {
+  column_physic <- sapply(data_basic$Sequence, function(seq)
+                            sum_index_values_index_2_3(seq, wyniki[[i]]))
+
+  column_physic_df <- as.data.frame(column_physic)
+  names(column_physic_df) <- as.character(names(wyniki)[i])
   data <- cbind(data, column_physic_df)
 }
 

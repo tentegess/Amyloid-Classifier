@@ -61,12 +61,14 @@ process_data <- function(data_text, aa_index) {
   return(aa_index)
 }
 
+
+
 data_text2 <- readLines("Amyloid-Classifier/aaindex2")
 data_text3 <- readLines("Amyloid-Classifier/aaindex3")
 
 aa_index_2_3_dto = list()
+
 # index 2
 aa_index_2_3_dto <- process_data(data_text2, aa_index_2_3_dto)
-
 # index 3
 aa_index_2_3_dto <- process_data(data_text3, aa_index_2_3_dto)

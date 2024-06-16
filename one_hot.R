@@ -20,24 +20,15 @@ data <- data[nchar(data$Sequence) == 6, ]
 data$Classification <- factor(data$Classification)
 data_basic <- data
 
-amino_acids_normal <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H",
-                        "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
-
-amino_acids <- c()
-for (aa1 in amino_acids_normal) {
-  for (aa2 in amino_acids_normal) {
-    combination <- paste(aa1, aa2, sep = "")
-    amino_acids <- c(amino_acids, combination)
-  }
-}
-
+amino_acids <- c("A", "R", "N", "D", "C", "Q", "E", "G", "H",
+                 "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V")
 
 # Funkcja do kodowania sekwencji
 encode_sequence <- function(sequence) {
-  encoding <- matrix(0, nrow = 1, ncol = length(amino_acids) * 3,
-                     dimnames = list(NULL, paste0(rep(1:3, each = length(amino_acids)), rep(amino_acids, times = 3))))
+  encoding <- matrix(0, nrow = 1, ncol = length(amino_acids) * 6,
+                     dimnames = list(NULL, paste0(rep(1:6, each = length(amino_acids)), rep(amino_acids, times = 6))))
   # Rozdzielenie sekwencji na pary aminokwasów
-  amino_acids_in_seq <- strsplit(sequence, "(?<=.{2})", perl = TRUE)[[1]]
+  amino_acids_in_seq <- strsplit(sequence, "")[[1]]
   for (i in seq_along(amino_acids_in_seq)) {
     aa <- amino_acids_in_seq[i]
     if (aa %in% amino_acids) {
@@ -56,15 +47,13 @@ encoded_data <- as.data.frame(encoded_data)
 data <- cbind(data, encoded_data)
 data <- data[, !(names(data) %in% 'Sequence')]
 
-# Dołaczanie danych fizyczno-chemicznych
 sum_index_values <- function(sequence, aa_index) {
   # Rozdzielenie sekwencji na pary aminokwasów
-  amino_acids_in_seq <- strsplit(sequence, "(?<=.{2})", perl = TRUE)[[1]]
+  amino_acids_in_seq <- strsplit(sequence, "")[[1]]
   sum_values <- 0
-
-  for (i in seq_along(amino_acids_in_seq)) {
-    # Sumowanie wartości indeksu dla każdego aminokwasu w sekwencji
-    sum_values <- sum_values + sum(aa_index[str_sub(amino_acids_in_seq[i], 2, 2), str_sub(amino_acids_in_seq[i], 1, 1)])
+  # Sumowanie wartości indeksu dla każdego aminokwasu w sekwencji
+  for (i in seq(1, length(amino_acids_in_seq) - 1)) {
+    sum_values <- sum_values + sum(aa_index[str_sub(amino_acids_in_seq[i]), amino_acids_in_seq[i+1]])
   }
   return(sum_values)
 }
@@ -104,25 +93,18 @@ print(conf_matrix)
 # Utworzenie kontroli treningowej dla RFE
 ctrl <- rfeControl(functions=rfFuncs, method="cv", number=10, allowParallel = TRUE)
 
-# Wybierz kolumny od 21 do końca
-selected_data <- train_data[, 22:ncol(train_data)]
+# Wybierz kolumny od 122 do końca
+selected_data <- train_data[, 122:ncol(train_data)]
 
 # Wykonanie RFE
-results_list <- list()
-cat("Rozpoczęto RFE...\n")
-for (i in 1:ncol(selected_data)) {
-  cat("Przetwarzanie: ", i, " na ", ncol(selected_data), "\n")
-  results <- rfe(selected_data, train_data$Classification, sizes=i, rfeControl=ctrl)
-  results_list[[i]] <- results
-}
-cat("Zakończono RFE.\n")
+results <- rfe(selected_data, train_data$Classification, sizes=c(1:ncol(selected_data)), rfeControl=ctrl)
 
 
 # Wyświetlenie wyników RFE
-print(results_list)
+print(results)
 
 # Wybór optymalnej liczby zmiennych
-optimal_vars <- predictors(results_list)
+optimal_vars <- predictors(results)
 print(optimal_vars)
 
 # Zakończenie równoległego przetwarzania
