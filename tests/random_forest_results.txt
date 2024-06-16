@@ -1,0 +1,31 @@
+Confusion Matrix and Statistics
+
+             Reference
+Prediction    amyloid non.amyloid
+  amyloid          78          26
+  non.amyloid      24         154
+
+               Accuracy : 0.8227
+                 95% CI : (0.773, 0.8654)
+    No Information Rate : 0.6383
+    P-Value [Acc > NIR] : 8.083e-12
+
+                  Kappa : 0.6176
+
+ Mcnemar's Test P-Value : 0.8875
+
+            Sensitivity : 0.7647
+            Specificity : 0.8556
+         Pos Pred Value : 0.7500
+         Neg Pred Value : 0.8652
+              Precision : 0.7500
+                 Recall : 0.7647
+                     F1 : 0.7573
+             Prevalence : 0.3617
+         Detection Rate : 0.2766
+   Detection Prevalence : 0.3688
+      Balanced Accuracy : 0.8101
+
+       'Positive' Class : amyloid
+
+"MCC: 0.617709739892708"
